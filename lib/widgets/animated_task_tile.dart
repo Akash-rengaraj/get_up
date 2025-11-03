@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
-import 'dart:math';
 
 import '../models/task.dart';
 
@@ -49,7 +48,7 @@ class _AnimatedTaskTileState extends State<AnimatedTaskTile> {
     final colors = theme.colorScheme;
 
     // Faded color for "done" text
-    final doneColor = colors.onSurface.withOpacity(0.5);
+    final doneColor = colors.onSurface.withAlpha(128);
     // Primary color for "to-do" text
     final todoColor = colors.onSurface;
     // Border color for checkbox

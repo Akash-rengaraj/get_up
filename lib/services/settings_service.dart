@@ -17,7 +17,7 @@ class SettingsService with ChangeNotifier {
     _isDarkMode = _settingsBox.get('isDarkMode', defaultValue: false);
     _autoDeleteProgress = _settingsBox.get('autoDeleteProgress', defaultValue: false);
     _autoDeleteMoney = _settingsBox.get('autoDeleteMoney', defaultValue: false);
-    _characterName = _settingsBox.get('characterName', defaultValue: 'Fox');
+    _characterName = _settingsBox.get('characterName', defaultValue: 'Fox'); // Default
     _userName = _settingsBox.get('userName');
     _userDOB = _settingsBox.get('userDOB');
   }

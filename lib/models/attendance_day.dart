@@ -1,30 +1,39 @@
 import 'package:hive/hive.dart';
 
-part 'debt.g.dart'; // This will be generated
+part 'attendance_day.g.dart'; // This will be generated
 
-@HiveType(typeId: 2) // Task is 0, Transaction is 1
-class Debt extends HiveObject {
-
+@HiveType(typeId: 4)
+enum AttendanceStatus {
   @HiveField(0)
-  String name; // Who?
+  present,
 
   @HiveField(1)
-  double amount; // How much?
+  halfDay,
 
   @HiveField(2)
-  DateTime createdAt;
+  absent,
 
   @HiveField(3)
-  bool isOwedToMe; // true = They owe me, false = I owe them
+  holiday,
 
   @HiveField(4)
-  bool isSettled; // The checkbox
+  onDuty,
 
-  Debt({
-    required this.name,
-    required this.amount,
-    required this.createdAt,
-    required this.isOwedToMe,
-    this.isSettled = false,
+  @HiveField(5)
+  none // Default for an empty day
+}
+
+@HiveType(typeId: 3)
+class AttendanceDay extends HiveObject {
+
+  @HiveField(0)
+  String dateKey;
+
+  @HiveField(1)
+  AttendanceStatus status;
+
+  AttendanceDay({
+    required this.dateKey,
+    required this.status,
   });
 }

@@ -30,11 +30,9 @@ class NotificationService {
 
     tz.initializeTimeZones();
 
-    // --- THIS IS THE FIX for flutter_timezone: ^1.0.0 ---
-    // The old version returns a String, not an object.
-    final String timeZoneName = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(timeZoneName));
-    // --- END FIX ---
+    // --- FIX for flutter_timezone: ^5.0.0 ---
+    final timeZoneInfo = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timeZoneInfo.identifier));
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
@@ -61,12 +59,6 @@ class NotificationService {
         iOS: DarwinNotificationDetails(presentSound: true),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-
-      // --- THIS IS THE FIX for flutter_local_notifications: ^16.3.0 ---
-      // This parameter belongs here for this version.
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      // --- END FIX ---
     );
   }
 
@@ -103,12 +95,6 @@ class NotificationService {
         iOS: DarwinNotificationDetails(presentSound: true),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-
-      // --- THIS IS THE FIX for flutter_local_notifications: ^16.3.0 ---
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      // --- END FIX ---
-
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }

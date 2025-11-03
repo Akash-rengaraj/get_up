@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'settings_page.dart'; // For the settings button
 
+// --- Capitalization Extension ---
 extension StringExtension on String {
   String capitalize() {
     if (isEmpty) return "";
@@ -179,8 +180,12 @@ class _AttendancePageState extends State<AttendancePage> with SingleTickerProvid
             const SizedBox(height: 24),
             _buildMonthNavigator(),
             const SizedBox(height: 8),
+
+            // --- 3. CALENDAR HEADER ---
             _buildCalendarHeader(),
             const SizedBox(height: 4),
+            // --- END ---
+
             _buildCalendarGrid(box),
             const SizedBox(height: 16),
             _buildLegend(context),
@@ -234,7 +239,7 @@ class _AttendancePageState extends State<AttendancePage> with SingleTickerProvid
     final theme = Theme.of(context);
     return Card(
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withAlpha(25),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Row(
@@ -320,6 +325,7 @@ class _AttendancePageState extends State<AttendancePage> with SingleTickerProvid
     );
   }
 
+  // --- 3. CALENDAR HEADER WIDGET ---
   Widget _buildCalendarHeader() {
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S']; // Monday to Sunday
     return GridView.builder(
@@ -419,7 +425,6 @@ class _AttendancePageState extends State<AttendancePage> with SingleTickerProvid
         textColor = Colors.white;
         break;
       case AttendanceStatus.none:
-      default:
         cellColor = Theme.of(context).cardTheme.color!;
         textColor = Theme.of(context).colorScheme.onSurface;
     }
@@ -488,6 +493,7 @@ class _AttendancePageState extends State<AttendancePage> with SingleTickerProvid
     );
   }
 
+  // --- 4. STATUS PICKER MODAL (UPDATED) ---
   void _showStatusPicker(BuildContext context, DateTime date, AttendanceStatus currentStatus) {
     final dateKey = _dateKey(date);
 
@@ -516,7 +522,10 @@ class _AttendancePageState extends State<AttendancePage> with SingleTickerProvid
                       ? Theme.of(context).colorScheme.primary
                       : Colors.transparent,
                 ),
+                // --- THIS IS THE FIX ---
+                // Use the new .capitalize() extension
                 title: Text(status.name.capitalize()),
+                // --- END FIX ---
                 onTap: () {
                   final dayEntry = attendanceBox.get(dateKey);
                   if (dayEntry == null) {

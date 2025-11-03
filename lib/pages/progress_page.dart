@@ -262,7 +262,7 @@ class _ProgressPageState extends State<ProgressPage> {
   Widget _buildChartCard(BuildContext context, {required String title, required double height, required Widget child}) {
     return Card(
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withAlpha(25),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -330,7 +330,7 @@ class _ProgressPageState extends State<ProgressPage> {
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   // --- THEME FIX ---
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
                 ),
                 titlePositionPercentageOffset: 0.55,
               ),
@@ -654,7 +654,7 @@ class _ProgressPageState extends State<ProgressPage> {
                 dotData: const FlDotData(show: false),
                 belowBarData: BarAreaData(
                     show: true,
-                    color: Colors.blueAccent.withOpacity(0.3)
+                    color: Colors.blueAccent.withAlpha(77)
                 ),
               ),
               LineChartBarData(
@@ -666,7 +666,7 @@ class _ProgressPageState extends State<ProgressPage> {
                 dotData: const FlDotData(show: false),
                 belowBarData: BarAreaData(
                     show: true,
-                    color: Colors.pinkAccent.withOpacity(0.3)
+                    color: Colors.pinkAccent.withAlpha(77)
                 ),
               ),
             ],

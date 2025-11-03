@@ -35,7 +35,6 @@ class _WelcomePageState extends State<WelcomePage> {
 
   void _saveAndStart() {
     if (_nameController.text.isEmpty || _selectedDate == null) {
-      // Show an error
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter your name and date of birth.'),
@@ -45,13 +44,11 @@ class _WelcomePageState extends State<WelcomePage> {
       return;
     }
 
-    // Save the data
     context.read<SettingsService>().savePersonalInfo(
       _nameController.text,
       _dobController.text,
     );
 
-    // Navigate to the main app, replacing this page
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const AppShell()),
     );
@@ -68,8 +65,9 @@ class _WelcomePageState extends State<WelcomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/images/logo.png', // Or your main logo
+                'assets/images/logo.png', // Using your logo.png
                 height: 150,
+                errorBuilder: (context, e, s) => const Icon(Icons.apps_rounded, size: 100),
               ),
               const SizedBox(height: 20),
               Text(
@@ -78,7 +76,7 @@ class _WelcomePageState extends State<WelcomePage> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Let\'s personalize your experience.',
+                'Let\'s personalize your experience. This will only be stored on your device.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -98,7 +96,7 @@ class _WelcomePageState extends State<WelcomePage> {
               const SizedBox(height: 16),
               TextField(
                 controller: _dobController,
-                readOnly: true, // Don't let user type
+                readOnly: true,
                 decoration: const InputDecoration(
                   labelText: 'Your Date of Birth',
                   border: OutlineInputBorder(

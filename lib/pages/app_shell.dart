@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-
-// Import the four tab pages
 import 'today_page.dart';
 import 'progress_page.dart';
 import 'money_page.dart';
 import 'attendance_page.dart';
-// We no longer import edit_tasks_page.dart or settings_page.dart here
+import '../widgets/add_task_modal.dart'; // Import the "Add Task" modal
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -15,15 +13,14 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  int _selectedIndex = 0; // Tracks the current tab
+  int _selectedIndex = 0;
 
-  // --- THIS IS THE FIX ---
-  // The list of pages is now back to 4
-  static const List<Widget> _pages = <Widget>[
-    TodayPage(),
-    ProgressPage(),
-    MoneyPage(),
-    AttendancePage(),
+  // We remove 'static const' so the pages can rebuild if needed
+  final List<Widget> _pages = <Widget>[
+    const TodayPage(),
+    const ProgressPage(),
+    const MoneyPage(),
+    const AttendancePage(),
   ];
 
   void _onItemTapped(int index) {
@@ -37,36 +34,56 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       body: _pages.elementAt(_selectedIndex),
 
-      // --- THIS IS THE FIX ---
-      // The BottomNavigationBar now only has 4 items
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today_outlined),
-            activeIcon: Icon(Icons.calendar_today),
-            label: 'Today',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_outlined),
-            activeIcon: Icon(Icons.bar_chart),
-            label: 'Progress',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.attach_money_outlined),
-            activeIcon: Icon(Icons.attach_money),
-            label: 'Money',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event_available_outlined),
-            activeIcon: Icon(Icons.event_available),
-            label: 'Attendance',
-          ),
-          // The "Edit Tasks" tab is GONE
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        showUnselectedLabels: true,
+      // --- FAB IS BACK ---
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // The "Add Task" button is back in the middle
+          showAddTaskModal(context, initialCategory: 'Todo');
+        },
+        child: const Icon(Icons.add, size: 30),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      // --- BOTTOM APP BAR ---
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+        elevation: 10,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            _buildNavItem(Icons.calendar_today_outlined, 'Today', 0),
+            _buildNavItem(Icons.bar_chart_outlined, 'Progress', 1),
+            const SizedBox(width: 40), // Spacer for FAB
+            _buildNavItem(Icons.attach_money_outlined, 'Money', 2),
+            _buildNavItem(Icons.event_available_outlined, 'Attendance', 3),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper widget to build a navigation item
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final bool isSelected = _selectedIndex == index;
+    final color = isSelected
+        ? Theme.of(context).bottomNavigationBarTheme.selectedItemColor
+        : Theme.of(context).bottomNavigationBarTheme.unselectedItemColor;
+
+    return InkWell(
+      onTap: () => _onItemTapped(index),
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 4),
+            Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+          ],
+        ),
       ),
     );
   }

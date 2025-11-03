@@ -7,7 +7,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../services/settings_service.dart';
-import 'edit_tasks_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -162,19 +161,7 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          ListTile(
-            leading: const Icon(Icons.edit_note_rounded),
-            title: const Text('Manage Habits & Todos'),
-            subtitle: const Text('Add, remove, or edit your tasks'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const EditTasksPage()),
-              );
-            },
-          ),
-          const Divider(height: 16),
+          // --- "MANAGE TASKS" BUTTON IS REMOVED FROM HERE ---
 
           Text(
             'PERSONAL INFO',
@@ -219,9 +206,24 @@ class SettingsPage extends StatelessWidget {
                     : Icons.light_mode_rounded
             ),
           ),
-
-          // --- CHARACTER PICKER IS NOW REMOVED ---
-
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Text(
+              'Choose Your Companion',
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Wrap(
+              spacing: 8.0,
+              children: [
+                _buildCharacterChip('Fox', 'assets/images/logo.png', settingsService, context), // Default
+                _buildCharacterChip('Boxer', 'assets/images/bear.png', settingsService, context),
+                _buildCharacterChip('Mike', 'assets/images/mike.png', settingsService, context),
+              ],
+            ),
+          ),
           const Divider(height: 32),
 
           Text(
@@ -306,6 +308,30 @@ class SettingsPage extends StatelessWidget {
             subtitle: Text('App Version 1.0.0'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterChip(String name, String imagePath, SettingsService settings, BuildContext context) {
+    final bool isSelected = settings.characterName == name;
+
+    return FilterChip(
+      label: Text(name),
+      selected: isSelected,
+      avatar: CircleAvatar(
+        radius: 12,
+        backgroundImage: AssetImage(imagePath),
+        backgroundColor: Colors.transparent,
+      ),
+      onSelected: (bool selected) {
+        if (selected) {
+          context.read<SettingsService>().setCharacter(name);
+        }
+      },
+      selectedColor: Theme.of(context).colorScheme.primary,
+      labelStyle: TextStyle(
+        color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
+        fontWeight: FontWeight.w500,
       ),
     );
   }

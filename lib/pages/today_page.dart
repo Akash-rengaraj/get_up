@@ -122,8 +122,6 @@ class _TodayPageState extends State<TodayPage> {
         notificationService.scheduleHabitNotification(task);
       } else {
         task.completionHistory.add(DateTime.now());
-        // You could cancel the notification here if you want
-        // notificationService.cancelNotification(task);
       }
     } else {
       task.isDone = !task.isDone;
@@ -160,7 +158,7 @@ class _TodayPageState extends State<TodayPage> {
               const Text(
                 '• Habits (like "Workout" or "Read") reset every day.\n'
                     '• Check them off to track your progress. You can uncheck them.\n'
-                    '• The "Progress" tab only tracks your habits, not todos.',
+                    '• Your progress is tracked on the "Progress" tab.',
                 style: TextStyle(fontSize: 15),
               ),
               const SizedBox(height: 16),
@@ -181,19 +179,20 @@ class _TodayPageState extends State<TodayPage> {
               ),
               const Text(
                 '• Tap the big "+" button to add any new item.\n'
+                    '• Tap the "pencil" button on this page to manage your tasks.\n'
                     '• Go to the "Progress" tab to see your charts.\n'
                     '• Go to the "Money" tab to track your finances.\n'
                     '• Go to the "Attendance" tab to track your attendance.\n'
-                    '• Go to the "Edit Tasks" tab to manage your data, theme, and profile.',
+                    '• Go to the "Settings" icon (top right) to manage data, theme, and profile.',
                 style: TextStyle(fontSize: 15),
               ),
               const Divider(height: 32),
               const Text(
-                'For Developers:',
+                'Developed by Johan',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const Text(
-                'Welcome! This app is built with Flutter & Hive. If you want to contribute, feel free to fork the project and start building!',
+                'This app is built with Flutter & Hive. Keep getting up!',
                 style: TextStyle(fontSize: 15, fontStyle: FontStyle.italic),
               ),
             ],
@@ -259,17 +258,34 @@ class _TodayPageState extends State<TodayPage> {
         ),
       ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const EditTasksPage()),
-          );
-        },
-        tooltip: 'Edit Tasks & Habits',
-        child: const Icon(Icons.edit_note_outlined),
-        mini: true,
+      // --- NEW: STACKED FLOATING ACTION BUTTONS ---
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'add_task_today', // Unique tag
+            onPressed: () {
+              showAddTaskModal(context, initialCategory: 'Todo');
+            },
+            tooltip: 'Add Task or Habit',
+            child: const Icon(Icons.add),
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton(
+            heroTag: 'edit_tasks_today', // Unique tag
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const EditTasksPage()),
+              );
+            },
+            tooltip: 'Edit Tasks & Habits',
+            child: const Icon(Icons.edit_note_outlined),
+          ),
+        ],
       ),
+      // --- END NEW SECTION ---
 
       body: ValueListenableBuilder(
         valueListenable: taskBox.listenable(),
@@ -292,7 +308,7 @@ class _TodayPageState extends State<TodayPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildSummaryCard(0, 0, context, quote),
+                  _buildCharacterCard(0, 0, context, characterName),
                   const SizedBox(height: 20),
                   Text(
                     'All clear for today!',
@@ -308,7 +324,7 @@ class _TodayPageState extends State<TodayPage> {
           }
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 80), // Padding for FAB
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 160), // Added more padding for the 2 FABs
             children: [
               if (_isBirthday) _buildBirthdayCard(context),
               if (_isBirthday) const SizedBox(height: 24),
@@ -316,7 +332,8 @@ class _TodayPageState extends State<TodayPage> {
               _buildSummaryCard(completedHabits, totalHabits, context, quote),
               const SizedBox(height: 24),
 
-              // Character card is removed
+              _buildCharacterCard(completedHabits, totalHabits, context, characterName),
+              const SizedBox(height: 24),
 
               _buildTaskSection('Studies', Icons.menu_book, studyHabits, context, true),
               const SizedBox(height: 24),
@@ -325,8 +342,6 @@ class _TodayPageState extends State<TodayPage> {
               const SizedBox(height: 24),
 
               _buildTaskSection('My To-Do List', Icons.checklist_rtl, openTodos, context, false),
-
-              const SizedBox(height: 80),
             ],
           );
         },
@@ -334,7 +349,6 @@ class _TodayPageState extends State<TodayPage> {
     );
   }
 
-  // --- BIRTHDAY CARD WIDGET ---
   Widget _buildBirthdayCard(BuildContext context) {
     return Card(
       elevation: 2,
@@ -364,7 +378,6 @@ class _TodayPageState extends State<TodayPage> {
     );
   }
 
-  // --- SUMMARY CARD WIDGET (REDESIGNED) ---
   Widget _buildSummaryCard(int completed, int total, BuildContext context, String quote) {
     double percent = total == 0 ? 0 : completed / total;
 
@@ -375,12 +388,11 @@ class _TodayPageState extends State<TodayPage> {
       builder: (context, value, child) {
         return Card(
           elevation: 2,
-          shadowColor: Colors.black.withOpacity(0.1),
+          shadowColor: Colors.black.withAlpha(25),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                // --- PROGRESS CIRCLE ---
                 SizedBox(
                   width: 70,
                   height: 70,
@@ -411,8 +423,6 @@ class _TodayPageState extends State<TodayPage> {
                   ),
                 ),
                 const SizedBox(width: 20),
-
-                // --- TEXT AND QUOTE ---
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -431,7 +441,6 @@ class _TodayPageState extends State<TodayPage> {
                         ),
                       ),
                       const Divider(height: 20),
-                      // --- THE QUOTE IS NOW HERE ---
                       Text(
                         '"$quote"',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -450,7 +459,69 @@ class _TodayPageState extends State<TodayPage> {
     );
   }
 
-  // --- TASK SECTION BUILDER ---
+  Widget _buildCharacterCard(int completed, int total, BuildContext context, String characterName) {
+
+    final String quote = _getQuote(completed, total);
+
+    String _getCharacterPath(String name) {
+      if (name == 'Boxer') return 'assets/images/bear.png'; // Use bear.png
+      if (name == 'Mike') return 'assets/images/mike.png'; // Use mike.png
+      return 'assets/images/logo.png'; // Default to logo
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Image.asset(
+            _getCharacterPath(characterName),
+            fit: BoxFit.contain,
+            height: 150,
+            errorBuilder: (context, error, stackTrace) {
+              return Center(
+                child: Icon(
+                  Icons.pets,
+                  size: 80,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(width: 12),
+
+        Expanded(
+          flex: 3,
+          child: Card(
+            elevation: 2.0,
+            shadowColor: Colors.black.withAlpha(25),
+            shape: RoundedRectangleBorder(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(4),
+                ),
+                side: BorderSide(color: Theme.of(context).colorScheme.outline)
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                quote,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTaskSection(String title, IconData icon, List<Task> tasks, BuildContext context, bool isHabitList) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -504,7 +575,6 @@ class _TodayPageState extends State<TodayPage> {
     );
   }
 
-  // --- DYNAMIC QUOTE GETTER ---
   final Map<int, String> _quotes = {
     0: "A new day! Let's get the first task done.",
     10: "Keep the momentum!",

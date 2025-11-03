@@ -19,14 +19,16 @@ dependencies:
 
   # --- THIS IS THE FIX ---
   # We are forcing older, stable versions that are compatible
-  fl_chart: ^0.66.0
-  flutter_local_notifications: ^16.3.0
-  flutter_timezone: ^1.0.0
+  fl_chart: 0.66.0
+  flutter_local_notifications: ^19.0.0
+  flutter_timezone: ^5.0.0
+  timezone: ^0.10.0
   # --- END FIX ---
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^6.0.0
   hive_generator: ^2.0.1
   build_runner: ^2.4.9
   flutter_launcher_icons: ^0.13.1
@@ -34,12 +36,13 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "legacy"
   ios: true
-  image_path: "assets/images/logo.png"
+  image_path: "assets/images/logo.png" # Using your uploaded logo
   adaptive_icon_padding: true
 
 flutter:
   uses-material-design: true
 
+  # --- USING YOUR UPLOADED ASSETS ---
   assets:
     - assets/images/
     - assets/images/logo.png

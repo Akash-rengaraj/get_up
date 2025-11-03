@@ -185,7 +185,7 @@ class _EditTasksPageState extends State<EditTasksPage> with SingleTickerProvider
           style: TextStyle(
             decoration: task.isHabit ? TextDecoration.none : (task.isDone ? TextDecoration.lineThrough : TextDecoration.none),
             color: task.isDone
-                ? Theme.of(context).colorScheme.onSurface.withOpacity(0.5)
+                ? Theme.of(context).colorScheme.onSurface.withAlpha(128)
                 : Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w500,
           ),

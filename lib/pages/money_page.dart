@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import '../widgets/add_expense_modal.dart';
 import '../widgets/add_income_modal.dart';
 import '../widgets/add_debt_modal.dart';
-import '../widgets/edit_transaction_modal.dart'; // <-- 1. THIS IS THE FIX
+import '../widgets/edit_transaction_modal.dart'; // <-- IMPORT IS NOW HERE
 import 'settings_page.dart';
 
 class MoneyPage extends StatefulWidget {
@@ -22,23 +22,26 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
   final NumberFormat currencyFormat = NumberFormat.simpleCurrency(locale: 'en_IN');
   late TabController _tabController;
 
-  String _sortOrder = 'date_desc';
+  // --- 8. NEW STATE FOR SORT/FILTER ---
+  String _sortOrder = 'date_desc'; // 'date_desc', 'amount_asc', 'amount_desc'
   double? _filterAmount;
   String? _filterAccount;
   final _filterController = TextEditingController();
+  // --- END NEW STATE ---
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
-      if (_tabController.index == 2) {
+      if (_tabController.index == 2) { // Switched to "Debts" tab
         _resetFilters();
       }
       setState(() {});
     });
   }
 
+  // --- NEW: Helper to reset filters ---
   void _resetFilters() {
     setState(() {
       _sortOrder = 'date_desc';
@@ -61,10 +64,6 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
       appBar: AppBar(
         title: const Text('My Wallets'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () => _showFilterSortDialog(context),
-          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {
@@ -102,9 +101,11 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
         builder: (context, Box<Transaction> box, _) {
           final allTransactions = box.values.toList();
 
+          // --- 8. NEW FILTER/SORT LOGIC ---
           List<Transaction> incomeTransactions = allTransactions.where((tx) => !tx.isExpense).toList();
           List<Transaction> expenseTransactions = allTransactions.where((tx) => tx.isExpense).toList();
 
+          // Apply filter
           if (_filterAmount != null && _filterAmount! > 0) {
             incomeTransactions = incomeTransactions.where((tx) => tx.amount >= _filterAmount!).toList();
             expenseTransactions = expenseTransactions.where((tx) => tx.amount >= _filterAmount!).toList();
@@ -113,26 +114,35 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
             incomeTransactions = incomeTransactions.where((tx) => tx.account == _filterAccount).toList();
             expenseTransactions = expenseTransactions.where((tx) => tx.account == _filterAccount).toList();
           }
+
+          // Apply sorting
           if (_sortOrder == 'date_desc') {
             incomeTransactions.sort((a, b) => b.date.compareTo(a.date));
             expenseTransactions.sort((a, b) => b.date.compareTo(a.date));
           } else if (_sortOrder == 'amount_asc') {
             incomeTransactions.sort((a, b) => a.amount.compareTo(b.amount));
             expenseTransactions.sort((a, b) => a.amount.compareTo(b.amount));
-          } else {
+          } else { // amount_desc
             incomeTransactions.sort((a, b) => b.amount.compareTo(a.amount));
             expenseTransactions.sort((a, b) => b.amount.compareTo(a.amount));
           }
+          // --- END NEW LOGIC ---
 
           double totalCash = 0;
           double totalBank = 0;
           double totalCoins = 0;
-          for (var tx in allTransactions) {
+          for (var tx in allTransactions) { // Totals are always calculated on ALL transactions
             double amount = tx.isExpense ? -tx.amount : tx.amount;
-            if (tx.account == 'Cash') totalCash += amount;
-            else if (tx.account == 'Bank/UPI') totalBank += amount;
-            else if (tx.account == 'Coins') totalCoins += amount;
+
+            if (tx.account == 'Cash') {
+              totalCash += amount;
+            } else if (tx.account == 'Bank/UPI') {
+              totalBank += amount;
+            } else if (tx.account == 'Coins') {
+              totalCoins += amount;
+            }
           }
+
           double netWorth = totalCash + totalBank + totalCoins;
 
           return Column(
@@ -171,18 +181,20 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
                 ],
               ),
 
+              // --- NEW: FILTER/SORT BAR ---
               _buildFilterSortControls(),
+              // --- END NEW BAR ---
 
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
                   children: [
                     _buildTransactionList(
-                        incomeTransactions,
+                        incomeTransactions, // Pass sorted/filtered list
                         "No income recorded yet."
                     ),
                     _buildTransactionList(
-                        expenseTransactions,
+                        expenseTransactions, // Pass sorted/filtered list
                         "No expenses recorded yet."
                     ),
                     _buildDebtsPage(),
@@ -196,6 +208,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
     );
   }
 
+  // --- NEW: FILTER/SORT DIALOG ---
   void _showFilterSortDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -204,6 +217,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
       ),
       builder: (context) {
+        // Use StatefulBuilder to update the dialog's own state
         return StatefulBuilder(
             builder: (BuildContext context, StateSetter setModalState) {
               final theme = Theme.of(context);
@@ -225,6 +239,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
                       ),
                       const SizedBox(height: 24),
 
+                      // --- Filter by Account ---
                       Text(
                         'FILTER BY ACCOUNT',
                         style: TextStyle(
@@ -255,6 +270,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
                       ),
                       const SizedBox(height: 20),
 
+                      // --- Filter by Amount ---
                       TextField(
                         controller: _filterController,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -267,6 +283,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
                         ),
                       ),
                       const SizedBox(height: 20),
+                      // --- Sort Order ---
                       Text(
                         'SORT BY',
                         style: TextStyle(
@@ -290,10 +307,12 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
                         },
                       ),
                       const SizedBox(height: 20),
+                      // --- Action Buttons ---
                       Row(
                         children: [
                           TextButton(
                             onPressed: () {
+                              // Clear state and rebuild
                               _resetFilters();
                               Navigator.pop(context);
                             },
@@ -302,8 +321,10 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
                           const Spacer(),
                           ElevatedButton(
                             onPressed: () {
+                              // Apply state and rebuild
                               setState(() {
                                 _filterAmount = double.tryParse(_filterController.text);
+                                // _sortOrder and _filterAccount are already set by setModalState
                               });
                               Navigator.pop(context);
                             },
@@ -321,10 +342,13 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
       },
     );
   }
+  // --- END NEW DIALOG ---
 
+  // --- NEW: FILTER/SORT CONTROLS WIDGET ---
   Widget _buildFilterSortControls() {
-    if (_tabController.index == 2) {
-      return const SizedBox.shrink();
+    // Only show this bar if we are on the Income or Expense tabs
+    if (_tabController.index == 2) { // 2 is the "Debts" tab
+      return const SizedBox(height: 0); // Show nothing
     }
 
     final theme = Theme.of(context);
@@ -340,9 +364,10 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
       filterText += " | > ${currencyFormat.format(_filterAmount)}";
     }
 
+    // If no filter is applied, show a simple button
     if (filterText.isEmpty && sortText == "Date (Newest)") {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
         child: Align(
           alignment: Alignment.centerRight,
           child: TextButton.icon(
@@ -354,15 +379,16 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
       );
     }
 
+    // If a filter IS applied, show the summary bar
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-      color: theme.colorScheme.primary.withOpacity(0.1),
+      color: theme.colorScheme.primary.withAlpha(25),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
             child: Text(
-              "Sorted by: $sortText$filterText",
+              "Active Filter: $sortText$filterText",
               style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold
@@ -378,12 +404,13 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
       ),
     );
   }
+  // --- END NEW WIDGET ---
 
 
   Widget _buildNetWorthCard(double amount, BuildContext context) {
     return Card(
       elevation: 4,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withAlpha(25),
       color: Theme.of(context).colorScheme.primary,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -394,7 +421,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
               'Total Balance',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withAlpha(204),
               ),
             ),
             const SizedBox(height: 8),
@@ -411,6 +438,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
     );
   }
 
+  // --- DARK MODE FIX FOR WALLET CARDS ---
   Widget _buildAccountCard(String title, double amount, IconData icon, Color color) {
     final theme = Theme.of(context);
     return Card(
@@ -422,7 +450,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: color.withOpacity(0.1),
+              backgroundColor: color.withAlpha(25),
               child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(height: 8),
@@ -431,6 +459,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 13,
+                // --- FIX: Use theme-aware text color ---
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
@@ -440,6 +469,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
+                // --- FIX: Use theme-aware text color ---
                 color: theme.colorScheme.onSurface,
               ),
             ),
@@ -448,6 +478,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
       ),
     );
   }
+  // --- END DARK MODE FIX ---
 
   Widget _buildTransactionList(List<Transaction> transactions, String emptyMessage) {
     if (transactions.isEmpty) {
@@ -469,7 +500,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
           margin: const EdgeInsets.symmetric(vertical: 4.0),
           child: ListTile(
             onTap: () {
-              showEditTransactionModal(context, tx); // This will now work
+              showEditTransactionModal(context, tx);
             },
             onLongPress: () {
               _confirmDeleteDialog(tx);
@@ -485,7 +516,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
             ),
             subtitle: Text(
               // --- THIS IS THE FIX ---
-              // Now that build_runner has run, tx.expenseCategory will exist
+              // Use 'expenseCategory' for expenses, 'account' for income
               '${isExpense ? (tx.expenseCategory ?? 'Other') : tx.account} • ${DateFormat.yMd().format(tx.date)}',
               style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
@@ -585,7 +616,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
         : (debt.isOwedToMe ? Colors.green[50]! : Colors.red[50]!);
 
     final Color textColor = debt.isSettled
-        ? theme.colorScheme.onSurface.withOpacity(0.5)
+        ? theme.colorScheme.onSurface.withAlpha(128)
         : theme.colorScheme.onSurface;
 
     final Color darkCardColor = debt.isSettled
@@ -612,7 +643,7 @@ class _MoneyPageState extends State<MoneyPage> with SingleTickerProviderStateMix
           style: TextStyle(
             fontWeight: FontWeight.w500,
             decoration: debt.isSettled ? TextDecoration.lineThrough : TextDecoration.none,
-            color: textColor.withOpacity(0.8),
+            color: textColor.withAlpha(204),
           ),
         ),
         leading: Checkbox(

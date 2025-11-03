@@ -20,17 +20,17 @@ val flutterVersionName: String = localProperties.getProperty("flutter.versionNam
 
 android {
     namespace = "com.johan.get_up"
-    compileSdk = 36
+    compileSdk = 36 // --- THIS IS THE FIX ---
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     sourceSets {
@@ -41,8 +41,8 @@ android {
 
     defaultConfig {
         applicationId = "com.johan.get_up"
-        minSdk = flutter.minSdkVersion
-        targetSdk = 36
+        minSdk = 26 // Required by flutter_timezone
+        targetSdk = 36 // --- THIS IS THE FIX ---
         versionCode = flutterVersionCode.toInt()
         versionName = flutterVersionName
     }
@@ -61,6 +61,7 @@ flutter {
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
 
+    // --- THIS IS THE FIX ---
     // This is the correct, stable version for our packages
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
